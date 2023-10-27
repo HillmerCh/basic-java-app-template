@@ -2,20 +2,34 @@ package org.example.repository;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
-import org.example.exception.GradeNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.example.model.Grade;
 
 public class GradeInMemoryRepositoryImpl implements GradeRepository {
 
-  private List<Grade> gradeList =
-          List.of(
-                  new Grade("UNIDAD 1", 4.5D, LocalDate.of(2023, Month.AUGUST, 1)),
-                  new Grade("UNIDAD 2", 5D, LocalDate.of(2023, Month.SEPTEMBER, 1)),
-                  new Grade("UNIDAD 3", 3.6D, LocalDate.of(2023, Month.OCTOBER, 1)),
-                  new Grade("UNIDAD 4", 3.6D, LocalDate.of(2023, Month.OCTOBER, 10)));
+  private static final Logger logger = LoggerFactory.getLogger( GradeInMemoryRepositoryImpl.class);
 
+  private List<Grade> gradeList;
+
+  public GradeInMemoryRepositoryImpl() {
+    this.gradeList = new ArrayList<>(loadGrades());//Al momento de construir el Repository se cargan los datos "quemados" en la clase
+  }
+
+  private List<Grade> loadGrades(){
+    logger.info( "Cargando los datos predefinidos " );
+    return List.of(
+            new Grade("UNIDAD 1", 4.5D, LocalDate.of(2023, Month.AUGUST, 1)),
+            new Grade("UNIDAD 2", 5D, LocalDate.of(2023, Month.SEPTEMBER, 1)),
+            new Grade("UNIDAD 3", 3.6D, LocalDate.of(2023, Month.OCTOBER, 1)),
+            new Grade("UNIDAD 4", 3.6D, LocalDate.of(2023, Month.OCTOBER, 10)));
+  }
 
   @Override
   public List<Grade> findAllGrades() {
@@ -23,14 +37,22 @@ public class GradeInMemoryRepositoryImpl implements GradeRepository {
   }
 
   @Override
-  public Grade getGrade(String unidad)throws GradeNotFoundException {
-    var grade = this.gradeList.stream().filter( p->p.project().equals( unidad ) ).findAny();
+  public Optional<Grade> getGrade(String unidad) {
+    return this.gradeList.stream().filter( p->p.project().equals( unidad ) ).findAny();
+  }
 
-    if(!grade.isPresent()){
-      throw new GradeNotFoundException();
-    }
+  @Override
+  public Grade addGrade(Grade newGrade) {
+    this.gradeList.add( newGrade );
 
-    return grade.get();
+    return this.gradeList.stream()
+            .filter( isTheGradeOfTheProject( newGrade ) )//Busca la nota en la lista que corresponda al proyecto de la nota recien creada
+            .findAny()
+            .orElse( null );//Si no la encuentra devuelve nulo
+  }
+
+  private Predicate<Grade> isTheGradeOfTheProject(Grade newGrade) {
+    return p -> p.project().equals( newGrade.project() );
   }
 
 

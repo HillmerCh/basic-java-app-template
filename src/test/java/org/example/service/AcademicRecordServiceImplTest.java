@@ -1,7 +1,11 @@
 package org.example.service;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.example.model.Grade;
 import org.example.repository.GradeInMemoryRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,4 +46,31 @@ class AcademicRecordServiceImplTest {
     assertNotNull(average); // Se verifica que el promedio (average) no sea nulo
     assertEquals(4.175D, average); // Se verifica que el promedio (average) sea igual a 4.175
   }
+
+
+  @Test
+  void a_new_grade_is_added_successful() {
+    /*
+     * Se adiciona una nueva nota a la lista
+     * */
+    Grade newGrade = new Grade( "PROJECT FINAL", 5D, LocalDate.now() );
+    Grade createdGrade = this.academicRecordService.addGrade(newGrade);
+
+    assertNotNull(createdGrade); // Se verifica que la nota creada no sea nula
+    assertEquals(newGrade.grade(), createdGrade.grade()); // Se verifica que el valor de la nota creada sea igual al valor definido
+  }
+
+  @Test
+  void listing_all_grades_should_be_return_successful() {
+    /*
+     * Consulta todas las notas
+     * */
+    List<Grade> grades = this.academicRecordService.listAllGrades();
+
+    assertNotNull(grades); // Se verifica que la lista no sea nula
+    assertFalse(grades.isEmpty()); // Se verifica que la lista no sea vacia
+    assertEquals(4, grades.size());//Se verifican que esten las 4 notas originalmente definidas UNIDAD 1 , UNIDAD 2 , UNIDAD 3 y UNIDAD 4
+  }
+
+
 }

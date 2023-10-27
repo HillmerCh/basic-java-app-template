@@ -1,6 +1,7 @@
 package org.example.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.example.exception.GradeNotFoundException;
 import org.example.model.Grade;
@@ -32,7 +33,24 @@ public class AcademicRecordServiceImpl implements AcademicRecordService {
   }
 
   @Override
-  public Grade getGrade(String unidad) throws GradeNotFoundException {
-    return this.gradeRepository.getGrade( unidad );
+  public Grade getGrade(String proyecto) throws GradeNotFoundException {
+    Optional<Grade> gradeOptional = this.gradeRepository.getGrade( proyecto );
+
+    if( gradeOptional.isEmpty() ){
+      logger.error( "No se encontró la nota para el proyecto {}", proyecto );
+      throw new GradeNotFoundException(proyecto);
+    }
+
+    return gradeOptional.get();
+  }
+
+  @Override
+  public List<Grade> listAllGrades() {
+    return null;
+  }
+
+  @Override
+  public Grade addGrade(Grade newGrade) {
+    return null;
   }
 }
